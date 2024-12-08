@@ -4,11 +4,13 @@ import {
   RadioGroup,
   FormControlLabel,
   makeStyles,
-  Button
+  Button,
+  Input,
 } from "@material-ui/core";
-import React from "react";
+import React, { useState } from "react";
 import bookingAction from "../../sdk/action/payment";
 import { useDispatch, useSelector } from "react-redux";
+import { useHistory } from "react-router";
 
 const useStyles = makeStyles(() => ({
   box: {
@@ -17,19 +19,47 @@ const useStyles = makeStyles(() => ({
     height: "500px",
     justifyContent: "space-between",
     display: "flex",
-    flexDirection: "column"
-  }
+    flexDirection: "column",
+  },
 }));
 
 const PaymentMode = () => {
   const Styles = useStyles();
   const dispatch = useDispatch();
   const modes = useSelector((state) => state.menuReducer.paymentModes);
-  const [value, setValue] = React.useState("female");
+  const [value, setValue] = React.useState("cc");
+  const history = useHistory();
+  const [formdetails, setFormDetails] = useState({
+    number: "",
+    expiry: "",
+    cvv: "",
+    name: "",
+  });
+
+  const handleFormData = (e, key) => {
+    const dta = e.target.value;
+
+    setFormDetails({
+      ...formdetails,
+      [key]: dta,
+    });
+  };
 
   const handleChange = (event) => {
     setValue(event.target.value);
     dispatch(bookingAction.setPaymentInfo({ mode: event.target.value }));
+  };
+
+  const handleSubmit = () => {
+    history.push("/");
+    alert("Order SuccessFully Placed!!");
+    setFormDetails({
+      number: "",
+      expiry: "",
+      cvv: "",
+      name: "",
+    });
+    dispatch(bookingAction.setCartSummary([]));
   };
 
   return (
@@ -48,7 +78,43 @@ const PaymentMode = () => {
               />
             ))}
         </RadioGroup>
-        <Button variant="contained">Make Payment </Button>
+        <form>
+          <label>
+            Name:{" "}
+            <Input
+              value={formdetails["name"]}
+              onChange={(e) => handleFormData(e, "name")}
+            />
+          </label>
+          <br />
+          <label>
+            Card Number:{" "}
+            <Input
+              placeholder="Card number"
+              value={formdetails["number"]}
+              onChange={(e) => handleFormData(e, "number")}
+            />
+          </label>
+          <br />
+          <label>
+            Expire Date:{" "}
+            <Input
+              value={formdetails["expiry"]}
+              onChange={(e) => handleFormData(e, "expiry")}
+            />
+          </label>
+          <br />
+          <label>
+            CVV:{" "}
+            <Input
+              value={formdetails["cvv"]}
+              onChange={(e) => handleFormData(e, "cvv")}
+            />
+          </label>
+        </form>
+        <Button variant="contained" onClick={handleSubmit}>
+          Make Payment{" "}
+        </Button>
       </Paper>
     </div>
   );
